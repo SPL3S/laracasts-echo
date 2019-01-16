@@ -1772,31 +1772,35 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
+  props: ['dataProject'],
   data: function data() {
+    console.log(this.dataProject);
     return {
-      tasks: [],
-      newTask: ''
+      project: this.dataProject,
+      newTask: '',
+      projectName: this.dataProject.name
     };
   },
   created: function created() {
     var _this = this;
 
-    axios.get(window.hostname + '/tasks').then(function (response) {
-      return _this.tasks = response.data;
-    });
-    window.Echo.channel('tasks').listen('TaskCreated', function (_ref) {
+    window.Echo.channel('tasks.' + this.project.id).listen('TaskCreated', function (_ref) {
       var task = _ref.task;
-
-      _this.tasks.push(task.body);
+      return _this.addTask(task);
     });
   },
   methods: {
-    addTask: function addTask() {
-      axios.post(window.hostname + '/tasks', {
+    save: function save() {
+      axios.post(window.hostname + "/api/projects/".concat(this.project.id, "/tasks"), {
         body: this.newTask
-      });
-      this.tasks.push(this.newTask);
+      }).then(function (response) {
+        return response.data;
+      }).then(this.addTask);
+    },
+    addTask: function addTask(task) {
+      this.project.tasks.push(task);
       this.newTask = '';
     }
   }
@@ -46748,11 +46752,13 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
+  return _c("div", { staticClass: "col-sm-12" }, [
+    _c("h2", { domProps: { textContent: _vm._s(_vm.projectName) } }),
+    _vm._v(" "),
     _c(
       "ul",
-      _vm._l(_vm.tasks, function(task) {
-        return _c("li", { domProps: { textContent: _vm._s(task) } })
+      _vm._l(_vm.project.tasks, function(task) {
+        return _c("li", { domProps: { textContent: _vm._s(task.body) } })
       }),
       0
     ),
@@ -46766,10 +46772,11 @@ var render = function() {
           expression: "newTask"
         }
       ],
+      staticClass: "form-control",
       attrs: { type: "text" },
       domProps: { value: _vm.newTask },
       on: {
-        blur: _vm.addTask,
+        blur: _vm.save,
         input: function($event) {
           if ($event.target.composing) {
             return

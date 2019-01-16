@@ -2,6 +2,7 @@
 
 use App\Events\OrderStatusUpdated;
 use App\Events\TaskCreated;
+use App\Project;
 use App\Task;
 
 /*
@@ -15,17 +16,24 @@ use App\Task;
 |
 */
 
+Route::get('/projects/{project}', function (Project $project){
+	$project->load('tasks');
 
-Route::get('/', function () {
-	return view('welcome');
+	return view('projects.show', compact('project'));
 });
 
-Route::get('/tasks', function(){
-	return Task::latest()->pluck('body');
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('/api/projects/{project}', function(Project $project){
+	return $project->tasks->pluck('body');
 });
 
-Route::post('/tasks', function(){
-	$task = Task::forceCreate(request(['body']));
+Route::post('/api/projects/{project}/tasks', function(Project $project){
+	$task = $project->tasks()->create(request(['body']));
 
 	event(new TaskCreated($task));
+
+	return $task;
 });
