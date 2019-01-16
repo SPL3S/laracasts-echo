@@ -1,3 +1,5 @@
+/*Get the right URL when you work with subfolders*/
+window.hostname = document.head.querySelector('meta[name="hostname"]').content;
 
 window._ = require('lodash');
 
@@ -50,6 +52,7 @@ window.Pusher = require('pusher-js');
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
+    authEndpoint: window.hostname + '/broadcasting/auth',
     key: process.env.MIX_PUSHER_APP_KEY,
     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
     encrypted: true
@@ -61,5 +64,3 @@ window.Echo.channel('orders').listen('OrderStatusUpdated', e => {
 });
 
 
-/*Get the wright URL when you work at your webserver with subfolders*/
-window.hostname = document.head.querySelector('meta[name="hostname"]').content;

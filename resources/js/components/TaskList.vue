@@ -1,6 +1,6 @@
 <template>
     <div class="col-sm-12">
-        <h2 v-text="projectName"></h2>
+        <h2 v-text="project.name"></h2>
         <ul>
             <li v-for="task in project.tasks" v-text="task.body"></li>
         </ul>
@@ -13,16 +13,14 @@
         props: ['dataProject'],
 
         data() {
-            console.log(this.dataProject);
             return {
                 project: this.dataProject,
                 newTask: '',
-                projectName: this.dataProject.name
             };
         },
 
         created() {
-            window.Echo.channel('tasks.' + this.project.id).listen('TaskCreated', ({task}) => this.addTask(task));
+            window.Echo.private('tasks.' + this.project.id).listen('TaskCreated', ({task}) => this.addTask(task));
         },
 
         methods: {

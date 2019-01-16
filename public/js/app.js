@@ -1776,17 +1776,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['dataProject'],
   data: function data() {
-    console.log(this.dataProject);
     return {
       project: this.dataProject,
-      newTask: '',
-      projectName: this.dataProject.name
+      newTask: ''
     };
   },
   created: function created() {
     var _this = this;
 
-    window.Echo.channel('tasks.' + this.project.id).listen('TaskCreated', function (_ref) {
+    window.Echo.private('tasks.' + this.project.id).listen('TaskCreated', function (_ref) {
       var task = _ref.task;
       return _this.addTask(task);
     });
@@ -46753,7 +46751,7 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "col-sm-12" }, [
-    _c("h2", { domProps: { textContent: _vm._s(_vm.projectName) } }),
+    _c("h2", { domProps: { textContent: _vm._s(_vm.project.name) } }),
     _vm._v(" "),
     _c(
       "ul",
@@ -58097,6 +58095,8 @@ var app = new Vue({
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var laravel_echo__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! laravel-echo */ "./node_modules/laravel-echo/dist/echo.js");
+/*Get the right URL when you work with subfolders*/
+window.hostname = document.head.querySelector('meta[name="hostname"]').content;
 window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
@@ -58143,6 +58143,7 @@ if (token) {
 window.Pusher = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   broadcaster: 'pusher',
+  authEndpoint: window.hostname + '/broadcasting/auth',
   key: "58947774fb7d8f6d7fa2",
   cluster: "us2",
   encrypted: true
@@ -58151,9 +58152,6 @@ window.Echo.channel('orders').listen('OrderStatusUpdated', function (e) {
   console.log("Order status with an id of " + e.order.id + " has been updated behind the scenes.");
   console.log(e);
 });
-/*Get the wright URL when you work at your webserver with subfolders*/
-
-window.hostname = document.head.querySelector('meta[name="hostname"]').content;
 
 /***/ }),
 
