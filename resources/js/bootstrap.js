@@ -59,3 +59,7 @@ window.Echo.channel('orders').listen('OrderStatusUpdated', e => {
 	console.log("Order status with an id of " + e.order.id + " has been updated behind the scenes.");
 	console.log(e);
 });
+
+
+/*Get the wright URL when you work at your webserver with subfolders*/
+window.hostname = document.head.querySelector('meta[name="hostname"]').content;
