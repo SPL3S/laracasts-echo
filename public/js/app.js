@@ -1774,11 +1774,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['data-project'],
   data: function data() {
     return {
       project: this.dataProject,
+      participants: [],
       newTask: '',
       activePeer: false,
       typingTimer: false
@@ -1786,7 +1796,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     channel: function channel() {
-      return window.Echo.private('tasks.' + this.project.id);
+      return window.Echo.join('tasks.' + this.project.id);
     },
     saveTaskEndpoint: function saveTaskEndpoint() {
       return window.hostname + "/api/projects/".concat(this.project.id, "/tasks");
@@ -1795,7 +1805,13 @@ __webpack_require__.r(__webpack_exports__);
   created: function created() {
     var _this = this;
 
-    this.channel.listen('TaskCreated', function (_ref) {
+    this.channel.here(function (users) {
+      return _this.participants = users;
+    }).joining(function (user) {
+      return _this.participants.push(user);
+    }).leaving(function (user) {
+      return _this.participants.splice(_this.participants.indexOf(user), 1);
+    }).listen('TaskCreated', function (_ref) {
       var task = _ref.task;
       return _this.addTask(task);
     }).listenForWhisper('typing', this.flashActivePeer);
@@ -46778,48 +46794,64 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "col-sm-12" }, [
-    _c("h3", { domProps: { textContent: _vm._s(_vm.project.name) } }),
-    _vm._v(" "),
-    _c(
-      "ul",
-      _vm._l(_vm.project.tasks, function(task) {
-        return _c("li", { domProps: { textContent: _vm._s(task.body) } })
+  return _c("div", { staticClass: "row" }, [
+    _c("div", { staticClass: "col-sm-8" }, [
+      _c("h3", { domProps: { textContent: _vm._s(_vm.project.name) } }),
+      _vm._v(" "),
+      _c(
+        "ul",
+        _vm._l(_vm.project.tasks, function(task) {
+          return _c("li", { domProps: { textContent: _vm._s(task.body) } })
+        }),
+        0
+      ),
+      _vm._v(" "),
+      _c("input", {
+        directives: [
+          {
+            name: "model",
+            rawName: "v-model",
+            value: _vm.newTask,
+            expression: "newTask"
+          }
+        ],
+        staticClass: "form-control",
+        attrs: { type: "text" },
+        domProps: { value: _vm.newTask },
+        on: {
+          blur: _vm.save,
+          keydown: _vm.tagPeers,
+          input: function($event) {
+            if ($event.target.composing) {
+              return
+            }
+            _vm.newTask = $event.target.value
+          }
+        }
       }),
-      0
-    ),
+      _vm._v(" "),
+      _vm.activePeer
+        ? _c("span", {
+            domProps: {
+              textContent: _vm._s(_vm.activePeer.name + " is typing...")
+            }
+          })
+        : _vm._e()
+    ]),
     _vm._v(" "),
-    _c("input", {
-      directives: [
-        {
-          name: "model",
-          rawName: "v-model",
-          value: _vm.newTask,
-          expression: "newTask"
-        }
-      ],
-      staticClass: "form-control",
-      attrs: { type: "text" },
-      domProps: { value: _vm.newTask },
-      on: {
-        blur: _vm.save,
-        keydown: _vm.tagPeers,
-        input: function($event) {
-          if ($event.target.composing) {
-            return
-          }
-          _vm.newTask = $event.target.value
-        }
-      }
-    }),
-    _vm._v(" "),
-    _vm.activePeer
-      ? _c("span", {
-          domProps: {
-            textContent: _vm._s(_vm.activePeer.name + " is typing...")
-          }
-        })
-      : _vm._e()
+    _c("div", { staticClass: "col-sm-4" }, [
+      _c("h4", [_vm._v("Active Participants")]),
+      _vm._v(" "),
+      _c(
+        "ul",
+        _vm._l(_vm.participants, function(participant) {
+          return _c("li", {
+            domProps: { textContent: _vm._s(participant.name) }
+          })
+        }),
+        0
+      )
+    ])
   ])
 }
 var staticRenderFns = []

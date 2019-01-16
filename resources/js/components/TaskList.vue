@@ -1,11 +1,20 @@
 <template>
-    <div class="col-sm-12">
-        <h3 v-text="project.name"></h3>
-        <ul>
-            <li v-for="task in project.tasks" v-text="task.body"></li>
-        </ul>
-        <input class="form-control" type="text" v-model="newTask" @blur="save" @keydown="tagPeers">
-        <span v-if="activePeer" v-text="activePeer.name + ' is typing...'"></span>
+    <div class="row">
+        <div class="col-sm-8">
+            <h3 v-text="project.name"></h3>
+            <ul>
+                <li v-for="task in project.tasks" v-text="task.body"></li>
+            </ul>
+            <input class="form-control" type="text" v-model="newTask" @blur="save" @keydown="tagPeers">
+            <span v-if="activePeer" v-text="activePeer.name + ' is typing...'"></span>
+        </div>
+        <div class="col-sm-4">
+            <h4>Active Participants</h4>
+
+            <ul>
+                <li v-for="participant in participants" v-text="participant.name"></li>
+            </ul>
+        </div>
     </div>
 </template>
 
@@ -16,6 +25,7 @@
         data() {
             return {
                 project: this.dataProject,
+                participants: [],
                 newTask: '',
                 activePeer: false,
                 typingTimer: false
@@ -24,7 +34,7 @@
 
         computed: {
             channel() {
-                return window.Echo.private('tasks.' + this.project.id);
+                return window.Echo.join('tasks.' + this.project.id);
             },
 
             saveTaskEndpoint() {
@@ -34,6 +44,9 @@
 
         created() {
             this.channel
+            .here(users => this.participants = users)
+            .joining(user => this.participants.push(user))
+            .leaving(user => this.participants.splice(this.participants.indexOf(user),1))
             .listen('TaskCreated',({task}) => this.addTask(task))
             .listenForWhisper('typing', this.flashActivePeer);
         },
@@ -66,7 +79,7 @@
 
             addTask(task){
                 this.activePeer = false;
-                
+
                 this.project.tasks.push(task);
 
                 this.newTask = '';

@@ -14,5 +14,7 @@ use App\Project;
 */
 
 Broadcast::channel('tasks.{project}', function ($user, Project $project) {
-	return $project->participants->contains($user);
+	if($project->participants->contains($user)){
+		return ['name' => $user->name];
+	}
 });
